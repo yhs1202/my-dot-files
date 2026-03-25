@@ -1,7 +1,7 @@
 # +------------------------------------------------------------------+
-# | Filepath: ~/.bashrc                                              |
+# | Filepath: ~/.cshrc                                               |
 # | Version : 1.0                                                    |
 # | Author  : Hoseung Yoon                                           |
 # | Last Rev: 26.03.25                                               |
 # +------------------------------------------------------------------+
-source $HOME/my-dot-files/hsyoon.bashrc
+source $HOME/my-dot-files/hsyoon.cshrc
