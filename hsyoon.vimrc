@@ -1,8 +1,8 @@
 " +------------------------------------------------------------------+ "
 " | Filepath: ~/my-dot-files/hsyoon.vimrc                            | "
-" | Version : 1.1.0                                                    | "
+" | Version : 1.1.1                                                    | "
 " | Author  : Hoseung Yoon                                           | "
-" | Last Rev: 26.04.05                                               | "
+" | Last Rev: 26.04.27                                               | "
 " +------------------------------------------------------------------+ "
 
 
@@ -17,6 +17,7 @@
 " ------ Encodings ----- "
 lang mes en_US.UTF-8            " Language and message encoding
 set encoding=utf-8              " Encoding of the editor
+set fileencoding=utf-8
 let mapleader = "<\Space>"      " Set the leader key
 
 " ------ General ------- "
@@ -35,13 +36,18 @@ set visualbell                  " Use visual bell instead of beeping
 set nolist                      " Don't show whitespace characters by default
 set listchars=tab:>>,trail:=,eol:\$ " Define how to display whitespace characters
 
-" ----- Custom status line ----- "
-" set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ ▶\ '.expand('%:p:h:t')}\ ▶\ %t\ %=[%l/%L\:%v]\ [%P]
+" ----- GUI Settings ----- "
+if has ('gui_running')
+  so $VIMRUNTIME/delmenu.vim
+endif
+
+" ----- Custom Statusline ----- "
+set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ ▶\ '.expand('%:p:h:t')}\ ▶\ %t\ %=[%l/%L\:%v]\ [%P]
 " set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ ❯\ '.expand('%:p:h:t')}\ ❯\ %t\ %=[%l/%L\:%v]\ [%P]
 " set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ »\ '.expand('%:p:h:t')}\ »\ %t\ %=[%l/%L\:%v]\ [%P]
 " set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ ›\ '.expand('%:p:h:t')}\ ›\ %t\ %=[%l/%L\:%v]\ [%P]
 " set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ →\ '.expand('%:p:h:t')}\ →\ %t\ %=[%l/%L\:%v]\ [%P]
-set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ 〉'.expand('%:p:h:t')}\ 〉%t\ %=[%l/%L\:%v]\ [%P]
+" set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ 〉'.expand('%:p:h:t')}\ 〉%t\ %=[%l/%L\:%v]\ [%P]
 " set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ 》'.expand('%:p:h:t')}\ 》%t\ %=[%l/%L\:%v]\ [%P]
 " set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ 〉'.expand('%:p:h:t')}\ 〉%t\ %=[%l/%L\:%v]\ [%P]
 " set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ ⟩\ '.expand('%:p:h:t')}\ ⟩\ %t\ %=[%l/%L\:%v]\ [%P]
@@ -50,8 +56,10 @@ set statusline=\ %m[%n]\ %<%{expand('%:p:h:h:t').'\ 〉'.expand('%:p:h:t')}\ 〉
 
 " ------ Editing ------ "
 set ignorecase                  " Ignore case in search patterns
+set smartcase                   " Override 'ignorecase' if search pattern contains uppercase letters
 set mouse=a                     " Enable mouse support in all modes
 set ve=block                    " Enable virtualedit in block visual mode
+set keymodel=startsel           " Start selection when cursor keys are used in visual mode
 
 " ----- Tabs and indentation ----- "
 set smartindent                 " Enable smart indentation
@@ -116,7 +124,7 @@ nnoremap <F2>           :set list!<CR><C-l>
 nnoremap <F3>           :set rnu!<CR>
 nnoremap <F12>          :lcd %:p:h<CR>:e .<CR>
 nnoremap <leader>e      :lcd %:p:h<CR>:e .<CR>
-nnoremap <S-F12>        :let @+ = expand('%:p') \| echo @+<CR>
+nnoremap <S-F12>        :let @+ = expand('%:p') \| echo expand('[PATH COPIED] ' . @+) <CR>
 nnoremap <S-F5>         :so ~/.vimrc<CR>
 nnoremap <Backspace>    <C-^>
 
@@ -147,6 +155,15 @@ nnoremap <S-left>   :vertical resize -20<CR>
 " ----- Commenting ----- "
 nnoremap <silent> gc :<C-u>call ToggleCommentLine()<CR>
 xnoremap <silent> gc :<C-u>call ToggleCommentBlock()<CR>
+
+" Add comment templates to the line below the current line
+nnoremap <silent> <F5> :<C-u>call AppendMyComment('todo')<CR>jo<Tab>
+inoremap <silent> <F5> <C-o>:call AppendMyComment('todo')<CR><C-o>j<C-o>o<Tab>
+nnoremap <silent> <F6> :<C-u>call AppendMyComment('fixme')<CR><S-j>
+inoremap <silent> <F6> <C-o>:call AppendMyComment('fixme')<CR><C-o><S-j>
+nnoremap <silent> <F7> :<C-u>call AppendMyComment('header')<CR>3jo
+inoremap <silent> <F7> <C-o>:call AppendMyComment('header')<CR><C-o>3jo
+
 
 " ----- Search Highlights ----- "
 nnoremap <RightMouse>           <NoP>
@@ -182,6 +199,13 @@ nnoremap <silent> ]b :bn<CR>    " Go to next buffer
 highlight MyCwordHL  cterm=bold ctermbg=yellow ctermfg=red    gui=bold guibg=#FFD700 guifg=#000000
 highlight Search     cterm=bold ctermbg=yellow ctermfg=red    gui=bold guibg=#FF0000 guifg=#000000
 highlight MatchParen cterm=bold ctermbg=red    ctermfg=white  gui=bold guibg=#ff5555 guifg=white
+
+" Custom diff colors for better visibility
+highlight DiffAdd    guifg=NONE guibg=#335533
+highlight DiffDelete guifg=NONE guibg=#553333
+highlight DiffChange guifg=NONE guibg=#333355
+highlight DiffText   guifg=#ffffff guibg=#4444bb
+
 
 
 " ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
@@ -336,6 +360,32 @@ function! ToggleCommentBlock() abort
     call setline(l:start, l:lines)
 endfunction
 
+" Get My comment template for each type
+function! AppendMyComment(type) abort
+    let l:prefix = s:GetCommentPrefix()
+    if empty(l:prefix)
+        return
+    endif
+
+    " Define templates for each comment type
+    let l:templates = {
+    \ 'todo': [
+    \   l:prefix . ' >>> TODO YHS BEGIN >>>',
+    \   l:prefix . ' <<< TODO YHS END <<<<<',
+    \ ],
+    \ 'fixme': [
+    \   l:prefix . ' !!! FIXME YHS BEGIN !!!',
+    \ ],
+    \ 'header': [
+    \   l:prefix . ' ----------------------------------------------------------------------------------- ',
+    \   l:prefix . ' ------------------------------------  EXAMPLE  ------------------------------------ ',
+    \   l:prefix . ' ----------------------------------------------------------------------------------- ',
+    \ ],
+    \ }
+    
+    call append(line('.'), l:templates[a:type])
+endfunction
+
 
 "  █████╗ ██╗   ██╗████████╗ ██████╗  ██████╗ ██████╗ ███╗   ███╗███╗   ███╗ █████╗ ███╗   ██╗██████╗ ███████╗
 " ██╔══██╗██║   ██║╚══██╔══╝██╔═══██╗██╔════╝██╔═══██╗████╗ ████║████╗ ████║██╔══██╗████╗  ██║██╔══██╗██╔════╝
@@ -352,6 +402,18 @@ au FileType * setlocal formatoptions=ql
 augroup NetrwClearSearch
   au!
   au BufLeave * if &filetype ==# 'netrw' | let @/ = '' | endif
+augroup END
+
+" Automatically set filetype to perl for custom configuration files
+augroup ConfAsPerl
+  au!
+  au BufRead,BufNewFile *
+        \ if &filetype ==# 'conf'
+        \ && expand('%:e') == ''
+        \ && expand('%:t') =~# 'conf$'
+        \ && getline(1) =~# '^#-*-.*perl.*-*-'
+        \ | setlocal filetype=perl
+        \ | endif
 augroup END
 
 
